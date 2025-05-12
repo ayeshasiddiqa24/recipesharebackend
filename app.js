@@ -4,6 +4,7 @@ const db = require("./models");
 
 const app = express();
 app.use(cors());
+app.options('*', cors()); // Handle preflight requests
 app.use(express.json());
 app.use(express.json()); // For JSON bodies
 app.use(express.urlencoded({ extended: true })); // For URL-encoded form submissions
