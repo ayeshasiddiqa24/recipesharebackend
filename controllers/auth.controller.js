@@ -32,22 +32,24 @@ exports.register = async (req, res) => {
 
 // Login user
 exports.login = async (req, res) => {
-  try {
-    // Set CORS headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
+  // Set CORS headers for every request
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000"); // or "*" in development
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 
+  // Handle preflight OPTIONS request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
